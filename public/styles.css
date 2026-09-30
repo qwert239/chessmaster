@@ -1,0 +1,126 @@
+:root {
+  color-scheme: dark;
+  --bg: #1a1714;
+  --ink: #f3ead7;
+  --muted: #b7a894;
+  --panel: #241f1a;
+  --line: #3a3229;
+  --accent: #c4a35a;
+  --danger: #e07a5f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Segoe UI", Georgia, serif;
+}
+
+.shell {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.kicker {
+  margin: 0 0 0.4rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--accent);
+}
+
+h1 { margin: 0 0 1.25rem; font-size: 2rem; font-weight: 600; }
+
+form, .controls, #moves {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+form { padding: 1rem; }
+
+label, #status, #ply-label { color: var(--muted); }
+
+label { display: block; margin-bottom: 0.45rem; font-size: 0.85rem; }
+
+textarea, button { font: inherit; }
+
+textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  color: var(--ink);
+  background: #120f0c;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+button {
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  font-weight: 650;
+  color: #1a1714;
+  background: var(--accent);
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#status { min-height: 1.2rem; margin: 0.75rem 0 0; }
+#status.error { color: var(--danger); }
+
+#stage { margin-top: 1.5rem; }
+#players { margin: 0 0 0.75rem; font-size: 1.25rem; }
+
+.play {
+  display: grid;
+  grid-template-columns: minmax(260px, 420px) minmax(180px, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+#board { width: 100%; max-width: 420px; aspect-ratio: 1; }
+
+#moves {
+  max-height: 420px;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  overflow: auto;
+}
+
+#moves li {
+  display: grid;
+  grid-template-columns: 2.2rem 1fr 1fr;
+  gap: 0.4rem;
+  list-style: none;
+}
+
+#moves button {
+  margin: 0;
+  padding: 0.1rem 0.25rem;
+  text-align: left;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+}
+
+#moves button.active { color: var(--accent); background: #3d3424; }
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  margin-top: 0.75rem;
+  padding: 0.4rem;
+}
+
+.controls button { margin: 0; min-width: 2.4rem; }
+#ply-label { min-width: 4.5rem; text-align: center; }
+
+@media (max-width: 720px) {
+  .play { grid-template-columns: 1fr; }
+}

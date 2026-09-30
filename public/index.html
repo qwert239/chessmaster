@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>chessmaster</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/assets/chessboard.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <p class="kicker">chessmaster</p>
+        <h1>Replay a game</h1>
+      </header>
+
+      <form id="load-form">
+        <label for="pgn">PGN</label>
+        <textarea id="pgn" rows="8" placeholder="[White &quot;Alice&quot;]&#10;[Black &quot;Bob&quot;]&#10;&#10;1. e4 e5 2. Nf3 Nc6 *"></textarea>
+        <button type="submit">Load</button>
+        <p id="status" role="status"></p>
+      </form>
+
+      <section id="stage" hidden>
+        <h2 id="players"></h2>
+        <div class="play">
+          <div id="board"></div>
+          <ol id="moves"></ol>
+        </div>
+        <div class="controls">
+          <button type="button" id="btn-start" aria-label="First move">«</button>
+          <button type="button" id="btn-prev" aria-label="Previous move">‹</button>
+          <span id="ply-label">0 / 0</span>
+          <button type="button" id="btn-next" aria-label="Next move">›</button>
+          <button type="button" id="btn-end" aria-label="Last move">»</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
