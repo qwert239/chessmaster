@@ -2,6 +2,13 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: chessmaster NestJS app on Lambda
 
+Parameters:
+  DbPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: Master password for the chessmaster database
+
 Globals:
   Function:
     Timeout: 30
@@ -11,6 +18,87 @@ Globals:
       - x86_64
 
 Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: false
+
+  PrivateSubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: false
+
+  LambdaSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: API function in the private network
+      VpcId: !Ref Vpc
+
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Postgres for the API function
+      VpcId: !Ref Vpc
+
+  DbSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DbSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId: !Ref LambdaSecurityGroup
+
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private subnets for chessmaster
+      SubnetIds:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
+
+  DbParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: Allow the plain DATABASE_URL inside the private network
+      Family: postgres16
+      Parameters:
+        rds.force_ssl: "0"
+
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      Engine: postgres
+      EngineVersion: "16"
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: 20
+      StorageType: gp3
+      DBName: chessmaster
+      MasterUsername: chessmaster
+      MasterUserPassword: !Ref DbPassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      DBParameterGroupName: !Ref DbParameterGroup
+      VPCSecurityGroups:
+        - !Ref DbSecurityGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      DeletionProtection: false
+
   ApiFunction:
     Type: AWS::Serverless::Function
     Metadata:
@@ -18,6 +106,21 @@ Resources:
     Properties:
       CodeUri: ./
       Handler: dist/lambda.handler
+      Policies:
+        - AWSLambdaVPCAccessExecutionRole
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref LambdaSecurityGroup
+        SubnetIds:
+          - !Ref PrivateSubnetA
+          - !Ref PrivateSubnetB
+      Environment:
+        Variables:
+          DATABASE_URL: !Sub
+            - postgresql://chessmaster:${Password}@${Host}:${Port}/chessmaster
+            - Password: !Ref DbPassword
+              Host: !GetAtt Database.Endpoint.Address
+              Port: !GetAtt Database.Endpoint.Port
       Events:
         Root:
           Type: HttpApi
@@ -34,3 +137,6 @@ Outputs:
   ApiUrl:
     Description: HTTP API endpoint
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
+  DbEndpoint:
+    Description: Private Postgres endpoint
+    Value: !GetAtt Database.Endpoint.Address
