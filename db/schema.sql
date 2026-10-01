@@ -13,6 +13,7 @@ CREATE TABLE moves (
   game_id uuid NOT NULL REFERENCES games (id) ON DELETE CASCADE,
   ply integer NOT NULL,
   san text NOT NULL,
+  eval numeric,
   verdict text,
   best_move text,
   UNIQUE (game_id, ply)
