@@ -1,5 +1,6 @@
 import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm";
 import { Chessboard, FEN } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/+esm";
+import { evaluateMoves } from "./stockfish.js";
 
 const ASSETS_URL = "https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/assets/";
 
@@ -15,7 +16,9 @@ const boardEl = document.querySelector("#board");
 let board;
 let fens = [];
 let sans = [];
+let evals = [];
 let ply = 0;
+let analysisRun = 0;
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -46,6 +49,21 @@ function positionsFromPgn(pgn) {
   return { fens: nextFens, sans: history };
 }
 
+function formatEval(score) {
+  if (!score) {
+    return "";
+  }
+  if (score.mate != null) {
+    const sign = score.mate > 0 ? "+" : "-";
+    return `${sign}#${Math.abs(score.mate)}`;
+  }
+  if (score.eval == null) {
+    return "";
+  }
+  const sign = score.eval > 0 ? "+" : "";
+  return `${sign}${score.eval.toFixed(2)}`;
+}
+
 function moveButton(index) {
   const button = document.createElement("button");
   button.type = "button";
@@ -59,13 +77,26 @@ function moveButton(index) {
   return button;
 }
 
+function moveCell(index) {
+  const cell = document.createElement("div");
+  cell.className = "move-cell";
+  if (!sans[index]) {
+    return cell;
+  }
+  const score = document.createElement("span");
+  score.className = "eval";
+  score.textContent = formatEval(evals[index]);
+  cell.append(moveButton(index), score);
+  return cell;
+}
+
 function renderMoves() {
   movesEl.replaceChildren();
   for (let i = 0; i < sans.length; i += 2) {
     const row = document.createElement("li");
     const number = document.createElement("span");
     number.textContent = `${i / 2 + 1}.`;
-    row.append(number, moveButton(i), moveButton(i + 1));
+    row.append(number, moveCell(i), moveCell(i + 1));
     movesEl.append(row);
   }
 }
@@ -92,6 +123,8 @@ function showGame(pgn) {
   const parsed = positionsFromPgn(pgn);
   fens = parsed.fens;
   sans = parsed.sans;
+  evals = [];
+  analysisRun += 1;
   const white = header(pgn, "White") || "White";
   const black = header(pgn, "Black") || "Black";
   playersEl.textContent = `${white} vs ${black}`;
@@ -99,6 +132,33 @@ function showGame(pgn) {
   ensureBoard();
   showPly(0);
 }
+
+document.querySelector("#btn-eval").addEventListener("click", async () => {
+  if (fens.length < 2) {
+    return;
+  }
+  const run = ++analysisRun;
+  const button = document.querySelector("#btn-eval");
+  button.disabled = true;
+  evals = sans.map(() => null);
+  renderMoves();
+  try {
+    await evaluateMoves(fens, (done, total, row) => {
+      if (run !== analysisRun) {
+        return;
+      }
+      evals[done - 1] = row;
+      renderMoves();
+      setStatus(done === total ? "Evaluation ready." : `Evaluating ${done} / ${total}`);
+    });
+  } catch (error) {
+    if (run === analysisRun) {
+      setStatus(error.message || "Stockfish failed.", true);
+    }
+  } finally {
+    button.disabled = false;
+  }
+});
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();

@@ -98,6 +98,19 @@ button {
   list-style: none;
 }
 
+.move-cell {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+.eval {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+}
+
 #moves button {
   margin: 0;
   padding: 0.1rem 0.25rem;
@@ -119,6 +132,7 @@ button {
 }
 
 .controls button { margin: 0; min-width: 2.4rem; }
+#btn-eval { padding-inline: 0.85rem; }
 #ply-label { min-width: 4.5rem; text-align: center; }
 
 @media (max-width: 720px) {
