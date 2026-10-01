@@ -11,6 +11,7 @@ CREATE TABLE games (
 CREATE TABLE moves (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id uuid NOT NULL REFERENCES games (id) ON DELETE CASCADE,
+  username text,
   ply integer NOT NULL,
   san text NOT NULL,
   eval numeric,

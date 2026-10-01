@@ -26,10 +26,10 @@ export class GamesService {
 
       // Store one row per ply.
       await client.query(
-        `INSERT INTO moves (game_id, ply, san)
-         SELECT $1, move.ply, move.san
-         FROM unnest($2::int[], $3::text[]) AS move(ply, san)`,
-        [gameId, parsed.plies, parsed.sans],
+        `INSERT INTO moves (game_id, username, ply, san)
+         SELECT $1, $2, move.ply, move.san
+         FROM unnest($3::int[], $4::text[]) AS move(ply, san)`,
+        [gameId, username, parsed.plies, parsed.sans],
       );
 
       await client.query('COMMIT');
