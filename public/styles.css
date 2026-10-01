@@ -58,6 +58,8 @@ textarea {
   resize: vertical;
 }
 
+#load-form button + button { margin-left: 0.5rem; }
+
 button {
   margin-top: 0.75rem;
   padding: 0.7rem 1rem;

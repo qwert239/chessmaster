@@ -19,6 +19,7 @@ let sans = [];
 let evals = [];
 let ply = 0;
 let analysisRun = 0;
+let loadedPgn = "";
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -125,6 +126,7 @@ function showGame(pgn) {
   sans = parsed.sans;
   evals = [];
   analysisRun += 1;
+  loadedPgn = pgn;
   const white = header(pgn, "White") || "White";
   const black = header(pgn, "Black") || "Black";
   playersEl.textContent = `${white} vs ${black}`;
@@ -172,6 +174,30 @@ form.addEventListener("submit", (event) => {
     setStatus("Loaded.");
   } catch (error) {
     setStatus(error.message || "Could not read that PGN.", true);
+  }
+});
+
+document.querySelector("#btn-save").addEventListener("click", async () => {
+  if (!loadedPgn) {
+    setStatus("Load a game first.", true);
+    return;
+  }
+
+  // Save the loaded game and its moves.
+  try {
+    const response = await fetch("/games", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pgn: loadedPgn }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      const message = Array.isArray(body.message) ? body.message[0] : body.message;
+      throw new Error(message || "Could not save the game.");
+    }
+    setStatus("Saved.");
+  } catch (error) {
+    setStatus(error.message || "Could not save the game.", true);
   }
 });
 
