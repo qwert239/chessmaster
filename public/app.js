@@ -17,6 +17,7 @@ let board;
 let fens = [];
 let sans = [];
 let evals = [];
+let analysis = [];
 let ply = 0;
 let analysisRun = 0;
 let loadedPgn = "";
@@ -125,6 +126,7 @@ function showGame(pgn) {
   fens = parsed.fens;
   sans = parsed.sans;
   evals = [];
+  analysis = [];
   analysisRun += 1;
   loadedPgn = pgn;
   const white = header(pgn, "White") || "White";
@@ -145,14 +147,26 @@ document.querySelector("#btn-eval").addEventListener("click", async () => {
   evals = sans.map(() => null);
   renderMoves();
   try {
-    await evaluateMoves(fens, (done, total, row) => {
+    const scores = await evaluateMoves(fens, (index, last, score) => {
       if (run !== analysisRun) {
         return;
       }
-      evals[done - 1] = row;
-      renderMoves();
+      if (index >= 1) {
+        evals[index - 1] = score;
+        renderMoves();
+      }
+      const done = index + 1;
+      const total = last + 1;
       setStatus(done === total ? "Evaluation ready." : `Evaluating ${done} / ${total}`);
     });
+    if (run !== analysisRun) {
+      return;
+    }
+    analysis = sans.map((_, index) => ({
+      before: scores[index]?.eval ?? null,
+      after: scores[index + 1]?.eval ?? null,
+      bestMove: scores[index]?.bestMove ?? null,
+    }));
   } catch (error) {
     if (run === analysisRun) {
       setStatus(error.message || "Stockfish failed.", true);
@@ -188,7 +202,10 @@ document.querySelector("#btn-save").addEventListener("click", async () => {
     const response = await fetch("/games", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pgn: loadedPgn }),
+      body: JSON.stringify({
+        pgn: loadedPgn,
+        ...(analysis.length === sans.length ? { analysis } : {}),
+      }),
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));

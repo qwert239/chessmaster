@@ -1,5 +1,5 @@
 const ENGINE_URL = "./engine/stockfish-19-lite-single.js";
-const DEPTH = 25;
+const DEPTH = 12;
 
 let worker;
 let readyPromise;
@@ -79,7 +79,11 @@ function analyze(fen, depth) {
             }
             if (line.startsWith("bestmove")) {
               sf.removeEventListener("message", onMessage);
-              resolve(whiteScore(fen, cp, mate));
+              const uci = line.split(/\s+/)[1];
+              resolve({
+                ...whiteScore(fen, cp, mate),
+                bestMove: uci && uci !== "(none)" ? uci : null,
+              });
             }
           }
         };
@@ -100,12 +104,11 @@ export function evaluateFen(fen, depth = DEPTH) {
 }
 
 export async function evaluateMoves(fens, onProgress) {
-  const rows = [];
-  for (let ply = 1; ply < fens.length; ply += 1) {
-    const score = await evaluateFen(fens[ply]);
-    const row = { ply, eval: score.eval, mate: score.mate };
-    rows.push(row);
-    onProgress?.(ply, fens.length - 1, row);
+  const scores = [];
+  for (let index = 0; index < fens.length; index += 1) {
+    const score = await evaluateFen(fens[index]);
+    scores.push(score);
+    onProgress?.(index, fens.length - 1, score);
   }
-  return rows;
+  return scores;
 }

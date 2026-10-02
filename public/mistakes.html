@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your mistakes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/assets/chessboard.css" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <p class="kicker"><a href="./">chessmaster</a></p>
+      <h1>Your mistakes</h1>
+      <p class="guide">
+        Enter your in-game username to look up your moves, then choose inaccuracies, mistakes, or blunders.
+        Evaluate a game before saving it. Show board opens the position before that move:
+        red is the move played, green is the better move.
+      </p>
+
+      <form id="filter-form" class="filters">
+        <label>
+          Name
+          <input id="name" name="name" autocomplete="name" />
+        </label>
+        <label>
+          Show
+          <select id="verdict" name="verdict">
+            <option value="inaccuracy">Inaccuracies</option>
+            <option value="mistake">Mistakes</option>
+            <option value="blunder">Blunders</option>
+          </select>
+        </label>
+        <button type="submit">Show</button>
+      </form>
+      <p id="status" role="status"></p>
+      <div id="results"></div>
+    </main>
+    <script type="module" src="./mistakes.js"></script>
+  </body>
+</html>

@@ -32,6 +32,8 @@ body {
   color: var(--accent);
 }
 
+.kicker a { color: inherit; text-decoration: none; }
+
 h1 { margin: 0 0 1.25rem; font-size: 2rem; font-weight: 600; }
 
 form, .controls, #moves {
@@ -137,6 +139,85 @@ button {
 #btn-eval { padding-inline: 0.85rem; }
 #ply-label { min-width: 4.5rem; text-align: center; }
 
+.corner-link {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  padding: 0.55rem 0.8rem;
+  color: #1a1714;
+  background: var(--accent);
+  border-radius: 8px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.guide {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.filters label { margin: 0; }
+
+.filters input, .filters select {
+  display: block;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--ink);
+  background: #120f0c;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.filters button { margin: 0; }
+
+.game { margin-top: 1.5rem; }
+
+.game h2 { margin: 0 0 0.75rem; font-size: 1.05rem; font-weight: 600; }
+
+.mistake {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.mistake-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mistake-row span { font-variant-numeric: tabular-nums; }
+
+.mistake button { margin: 0; padding: 0.45rem 0.7rem; }
+
+.board-slot { margin-top: 0.75rem; }
+
+.board-frame { position: relative; width: min(100%, 320px); }
+
+.board-target { width: 100%; aspect-ratio: 1; }
+
+.arrows {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 @media (max-width: 720px) {
   .play { grid-template-columns: 1fr; }
+  .corner-link { position: static; display: inline-block; margin: 1rem 0 0 1.25rem; }
+  .mistake-row { grid-template-columns: 1fr 1fr; }
 }
