@@ -27,11 +27,13 @@ function setStatus(message, isError = false) {
   statusEl.classList.toggle("error", isError);
 }
 
+// Read one PGN header, such as White or Black.
 function header(pgn, name) {
   const match = pgn.match(new RegExp(`\\[${name}\\s+"([^"]*)"\\]`));
   return match?.[1] ?? "";
 }
 
+// Replay the PGN into a FEN before and after every move.
 function positionsFromPgn(pgn) {
   const chess = new Chess();
   chess.loadPgn(pgn, { strict: false });
@@ -51,6 +53,7 @@ function positionsFromPgn(pgn) {
   return { fens: nextFens, sans: history };
 }
 
+// White-relative pawns, or a mate distance like +#3.
 function formatEval(score) {
   if (!score) {
     return "";
@@ -66,6 +69,7 @@ function formatEval(score) {
   return `${sign}${score.eval.toFixed(2)}`;
 }
 
+// One move button in the list.
 function moveButton(index) {
   const button = document.createElement("button");
   button.type = "button";
@@ -79,6 +83,7 @@ function moveButton(index) {
   return button;
 }
 
+// Move button with its eval on the right.
 function moveCell(index) {
   const cell = document.createElement("div");
   cell.className = "move-cell";
@@ -92,6 +97,7 @@ function moveCell(index) {
   return cell;
 }
 
+// Draw the move list, two plies per row.
 function renderMoves() {
   movesEl.replaceChildren();
   for (let i = 0; i < sans.length; i += 2) {
@@ -103,6 +109,7 @@ function renderMoves() {
   }
 }
 
+// Show one position on the board.
 function showPly(next) {
   ply = Math.max(0, Math.min(next, fens.length - 1));
   board.setPosition(fens[ply], true);
@@ -110,6 +117,7 @@ function showPly(next) {
   renderMoves();
 }
 
+// Create the board the first time a game is loaded.
 function ensureBoard() {
   if (board) {
     return;
@@ -121,6 +129,7 @@ function ensureBoard() {
   });
 }
 
+// Load a PGN onto the board and clear any previous evals.
 function showGame(pgn) {
   const parsed = positionsFromPgn(pgn);
   fens = parsed.fens;
@@ -137,6 +146,7 @@ function showGame(pgn) {
   showPly(0);
 }
 
+// Score every position. analysis is what Save stores.
 document.querySelector("#btn-eval").addEventListener("click", async () => {
   if (fens.length < 2) {
     return;
@@ -176,6 +186,7 @@ document.querySelector("#btn-eval").addEventListener("click", async () => {
   }
 });
 
+// Load the pasted PGN. This does not save it.
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const pgn = pgnInput.value.trim();
@@ -218,11 +229,13 @@ document.querySelector("#btn-save").addEventListener("click", async () => {
   }
 });
 
+// Step through the loaded game.
 document.querySelector("#btn-start").addEventListener("click", () => showPly(0));
 document.querySelector("#btn-prev").addEventListener("click", () => showPly(ply - 1));
 document.querySelector("#btn-next").addEventListener("click", () => showPly(ply + 1));
 document.querySelector("#btn-end").addEventListener("click", () => showPly(fens.length - 1));
 
+// Arrow keys step through the loaded game.
 document.addEventListener("keydown", (event) => {
   if (stage.hidden || event.target === pgnInput) {
     return;

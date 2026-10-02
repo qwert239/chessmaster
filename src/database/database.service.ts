@@ -13,6 +13,7 @@ export class DatabaseService implements OnModuleDestroy {
     });
   }
 
+  // Close the pool when the app shuts down.
   async onModuleDestroy() {
     await this.pool.end();
   }

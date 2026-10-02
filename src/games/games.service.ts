@@ -14,6 +14,7 @@ type AnalysisMove = {
 export class GamesService {
   constructor(private readonly database: DatabaseService) {}
 
+  // Save a game and one row per move.
   async save(pgn: string, analysis?: AnalysisMove[]) {
     // Parse the PGN into players, result, and moves.
     const parsed = this.parse(pgn);
@@ -63,6 +64,7 @@ export class GamesService {
     }
   }
 
+  // List one player's inaccuracies, mistakes, or blunders, grouped by game.
   async findMistakes(name: string, verdict: string) {
     if (!VERDICTS.includes(verdict as (typeof VERDICTS)[number])) {
       throw new BadRequestException('Choose inaccuracies, mistakes, or blunders.');
@@ -95,6 +97,7 @@ export class GamesService {
     return this.gamesFrom(found.rows);
   }
 
+  // Eval after the move, verdict, and best move. No verdict when the played move is best.
   private moveRows(sans: string[], analysis?: AnalysisMove[]) {
     const chess = new Chess();
     const rows = {
@@ -119,6 +122,7 @@ export class GamesService {
     return rows;
   }
 
+  // True when the played move and the engine move are the same squares.
   private sameMove(fen: string, san: string, uci: string | null) {
     if (!uci || uci.length < 4) {
       return false;
@@ -131,6 +135,7 @@ export class GamesService {
     return played.from === uci.slice(0, 2) && played.to === uci.slice(2, 4) && played.promotion === promotion;
   }
 
+  // Group flat move rows under each game.
   private gamesFrom(
     rows: Array<{
       id: string;
@@ -163,6 +168,7 @@ export class GamesService {
     return games;
   }
 
+  // Inaccuracy from 0.5 pawns, mistake from 1, blunder from 2.
   private verdictFor(ply: number, before: number | null, after: number | null) {
     const loss = this.lossForMover(ply, before, after);
     if (loss == null || loss < 0.5) {
@@ -177,6 +183,7 @@ export class GamesService {
     return 'blunder';
   }
 
+  // Pawns the mover lost. Odd ply is White.
   private lossForMover(ply: number, before: number | null, after: number | null) {
     if (before == null || after == null) {
       return null;
@@ -184,6 +191,7 @@ export class GamesService {
     return ply % 2 === 1 ? before - after : after - before;
   }
 
+  // One mistake, plus the squares for the red and green arrows.
   private mistakeView(row: {
     ply: number;
     san: string;
@@ -206,6 +214,7 @@ export class GamesService {
     };
   }
 
+  // Position before this ply.
   private fenBefore(pgn: string, ply: number) {
     const chess = new Chess();
     chess.loadPgn(pgn, { strict: false });
@@ -217,6 +226,7 @@ export class GamesService {
     return chess.fen();
   }
 
+  // From and to squares of the played move.
   private playedSquares(fen: string, san: string) {
     const move = new Chess(fen).move(san);
     if (!move) {
@@ -225,6 +235,7 @@ export class GamesService {
     return { from: move.from, to: move.to };
   }
 
+  // From, to, and SAN of the engine move.
   private bestSquares(fen: string, uci: string | null) {
     if (!uci || uci.length < 4) {
       return null;
@@ -240,6 +251,7 @@ export class GamesService {
     return { from: move.from, to: move.to, san: move.san };
   }
 
+  // Players, result, and SAN moves from a PGN.
   private parse(pgn: string) {
     const chess = new Chess();
     try {

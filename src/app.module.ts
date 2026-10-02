@@ -1,4 +1,4 @@
-// Root module
+// Load env, serve the site, and register games.
 
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';

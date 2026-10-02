@@ -1,3 +1,4 @@
+-- One saved game.
 CREATE TABLE games (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   username text,
@@ -8,6 +9,7 @@ CREATE TABLE games (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- One row per ply. eval is White's score after the move.
 CREATE TABLE moves (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   game_id uuid NOT NULL REFERENCES games (id) ON DELETE CASCADE,

@@ -32,6 +32,7 @@ export class GamesController {
     return this.games.findMistakes(name.trim(), verdict);
   }
 
+  // Keep numeric evals and a string best move from the request.
   private analysis(value: unknown) {
     if (value == null) {
       return undefined;

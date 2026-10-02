@@ -10,6 +10,7 @@ function setStatus(message, isError = false) {
   statusEl.classList.toggle("error", isError);
 }
 
+// Signed pawn score, such as +0.34.
 function formatEval(value) {
   if (value == null) {
     return "";
@@ -18,6 +19,7 @@ function formatEval(value) {
   return `${sign}${value.toFixed(2)}`;
 }
 
+// Center of a square in the arrow overlay.
 function squarePoint(square, size) {
   const squareSize = size / 8;
   const file = square.charCodeAt(0) - 97;
@@ -28,6 +30,7 @@ function squarePoint(square, size) {
   };
 }
 
+// Red is the played move. Green is the best move.
 function drawArrows(frame, move) {
   const size = frame.clientWidth;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -71,6 +74,7 @@ function drawArrows(frame, move) {
   frame.append(svg);
 }
 
+// Toggle the board under one move.
 function showBoard(article, move) {
   const slot = article.querySelector(".board-slot");
   const button = article.querySelector("button");
@@ -103,11 +107,13 @@ function showBoard(article, move) {
   requestAnimationFrame(() => drawArrows(frame, move));
 }
 
+// White vs Black, plus the result when the game has one.
 function gameTitle(game) {
   const names = `${game.white || "White"} vs ${game.black || "Black"}`;
   return game.result && game.result !== "*" ? `${names} ${game.result}` : names;
 }
 
+// List mistakes grouped by game.
 function render(games) {
   results.replaceChildren();
   const count = games.reduce((sum, game) => sum + game.moves.length, 0);
@@ -157,6 +163,7 @@ function render(games) {
   }
 }
 
+// Load mistakes for an in-game username and a verdict.
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const name = new FormData(form).get("name");

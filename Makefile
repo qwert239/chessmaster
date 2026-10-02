@@ -1,3 +1,4 @@
+# Compile the app and install production dependencies for Lambda.
 build-ApiFunction:
 	npm ci
 	npm run build

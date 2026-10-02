@@ -23,6 +23,7 @@ Globals:
       - x86_64
 
 Resources:
+  # Private network shared by Lambda and RDS. The public route lets a chosen IP reach Postgres.
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -92,6 +93,7 @@ Resources:
       GroupDescription: Postgres for the API function
       VpcId: !Ref Vpc
 
+  # Lambda can connect. Public access is the commented block below.
   DbSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -127,6 +129,7 @@ Resources:
       Parameters:
         rds.force_ssl: "0"
 
+  # Postgres 16. Publicly reachable only after the gateway and routes exist.
   Database:
     Type: AWS::RDS::DBInstance
     DependsOn:
@@ -153,6 +156,7 @@ Resources:
       MultiAZ: false
       DeletionProtection: false
 
+  # Nest API. DATABASE_URL is built from the RDS endpoint and DbPassword.
   ApiFunction:
     Type: AWS::Serverless::Function
     Metadata:
