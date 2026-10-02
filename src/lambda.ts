@@ -19,7 +19,13 @@ async function getHandler(): Promise<LambdaHandler> {
     );
     await app.init();
     // Turn the Express app into a Lambda handler.
-    cached = serverlessExpress({ app: expressApp });
+    // Wasm must be base64. Otherwise API Gateway treats it as text and corrupts it.
+    cached = serverlessExpress({
+      app: expressApp,
+      binarySettings: {
+        contentTypes: ['image/*', 'application/wasm', 'application/octet-stream'],
+      },
+    });
   }
   return cached;
 }
