@@ -168,27 +168,35 @@ export class GamesService {
     return games;
   }
 
-  // Inaccuracy from 0.5 pawns, mistake from 1, blunder from 2.
+  // Inaccuracy from a 0.1 win-chance drop, mistake from 0.2, blunder from 0.3.
   private verdictFor(ply: number, before: number | null, after: number | null) {
     const loss = this.lossForMover(ply, before, after);
-    if (loss == null || loss < 0.5) {
+    if (loss == null || loss < 0.1) {
       return null;
     }
-    if (loss < 1) {
+    if (loss < 0.2) {
       return 'inaccuracy';
     }
-    if (loss < 2) {
+    if (loss < 0.3) {
       return 'mistake';
     }
     return 'blunder';
   }
 
-  // Pawns the mover lost. Odd ply is White.
+  // Win chances the mover lost, from -1 to 1. Odd ply is White.
   private lossForMover(ply: number, before: number | null, after: number | null) {
     if (before == null || after == null) {
       return null;
     }
-    return ply % 2 === 1 ? before - after : after - before;
+    const from = this.winningChances(before);
+    const to = this.winningChances(after);
+    return ply % 2 === 1 ? from - to : to - from;
+  }
+
+  // White's win chances from a pawn score.
+  private winningChances(pawns: number) {
+    const chances = 2 / (1 + Math.exp(-0.00368208 * pawns * 100)) - 1;
+    return Math.max(-1, Math.min(1, chances));
   }
 
   // One mistake, plus the squares for the red and green arrows.
