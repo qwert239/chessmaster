@@ -1,114 +1,67 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# chessmaster
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+체스 기보를 저장하고, 그 사람이 둔 나쁜 수를 찾아 봐서 복습할 수 있는 앱입니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+배포 주소: https://gcx6o4a8ia.execute-api.ap-northeast-2.amazonaws.com
 
-## Description
+PGN은 체스 한 판을 글로 적은 것입니다. 체스 사이트에서 복사할 수 있는 텍스트이고, 누가 백과 흑이었는지와 둔 수가 들어 있습니다.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Stockfish는 체스 프로그램입니다. 각 장면에서 누가 얼마나 유리한지 점수로 알려 줍니다. 양수는 백이 유리하고, 음수는 흑이 유리합니다. `+#3`은 백이 3수 안에 체크메이트할 수 있다는 뜻입니다.
 
-## Project setup
+## 사용법
 
-```bash
-$ npm install
+### 기보 불러오기
+
+![메인 페이지](docs/main.jpg)
+
+1. PGN을 붙여 넣고 `Load`를 누릅니다. 아직 저장되지 않습니다.
+2. 보드 아래 버튼이나 좌우 화살표로 수를 이동합니다. 각 수의 점수는 수 오른쪽에 나옵니다.
+3. `Evaluate`로 Stockfish 평가를 돌립니다.
+4. 평가가 끝나면 `Save`를 누릅니다. 평가 전에 저장하면 실수 목록에 나오지 않습니다.
+
+### 실수 보기
+
+오른쪽 위 `See your mistakes`로 이동합니다.
+
+![실수 페이지](docs/mistakes.jpg)
+
+1. **Name**에 기보에 적힌 백 또는 흑 이름을 입력합니다.
+2. Inaccuracies, Mistakes, Blunders 중 하나를 고르고 `Show`를 누릅니다.
+3. 게임별로 둔 수(Move), 그 수 이후의 점수(Eval), 더 나은 수(Best Move)를 볼 수 있습니다.
+4. `Show board`는 그 수를 두기 전 장면입니다. 빨간 화살표는 둔 수, 초록 화살표는 더 나은 수입니다.
+
+나쁜 수는 승률이 얼마나 줄었는지로 정합니다. 승률이 조금 줄면 Inaccuracy, 더 줄면 Mistake, 크게 줄면 Blunder입니다.
+
+## 스택
+
+브라우저는 보드와 Stockfish를 담당합니다. 서버는 NestJS이고, 데이터베이스는 Postgres입니다. 로컬은 `.env`의 `DATABASE_URL`을 읽고, Lambda는 SAM이 RDS 주소와 비밀번호로 만든 `DATABASE_URL`을 읽습니다.
+
+```text
+브라우저 (보드, Stockfish)
+        |  POST /games , GET /mistakes
+        v
+NestJS  ---- 로컬 ----> 로컬 Postgres
+        ---- Lambda --> RDS Postgres
 ```
 
-## Compile and run the project
+`POST /games`는 기보와 평가를 저장합니다. `GET /mistakes?name=&verdict=`는 그 이름이 둔 나쁜 수만 게임별로 돌려줍니다. 데이터베이스에서 `games`는 기보 하나, `moves`는 그 안의 한 수입니다.
+
+로컬 실행:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+psql "postgresql://USER:PASSWORD@localhost:5432/chessmaster" -f db/schema.sql
+npm run start:dev
 ```
 
-## Run tests
+`.env`에는 `DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/chessmaster`를 넣습니다. 이 파일은 커밋하지 않습니다. 앱은 http://localhost:3000 입니다.
+
+배포는 `sam build` 다음 `sam deploy`입니다. 데이터베이스 비밀번호는 스택을 처음 만들 때 넘깁니다.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+sam deploy --parameter-overrides "DbPassword=YOUR_PASSWORD"
 ```
 
-## Deployment
+이후 배포는 그 값을 유지하므로 `DbPassword` 없이 `sam deploy`만 하면 됩니다. 데이터베이스 수정은 RDS 포트 5432를 내 IP에만 여는 규칙을 추가한 뒤 PC에서 쿼리를 실행하고, 규칙을 지우면 됩니다.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Stockfish 파일(`public/engine/`)은 [stockfish.js](https://github.com/nmrugg/stockfish.js) 19이며 GPLv3입니다.
