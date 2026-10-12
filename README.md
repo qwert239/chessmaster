@@ -14,23 +14,23 @@ Stockfish는 체스 프로그램입니다. 각 장면에서 누가 얼마나 유
 
 ![메인 페이지](docs/main.jpg)
 
-1. PGN을 붙여 넣고 `Load`를 누릅니다. 아직 저장되지 않습니다.
-2. 보드 아래 버튼이나 좌우 화살표로 수를 이동합니다. 각 수의 점수는 수 오른쪽에 나옵니다.
-3. `Evaluate`로 Stockfish 평가를 돌립니다.
-4. 평가가 끝나면 `Save`를 누릅니다. 평가 전에 저장하면 실수 목록에 나오지 않습니다.
+1. PGN을 붙여 넣고 `Load`를 누릅니다.
+2. 보드 아래 버튼이나 좌우 화살표로 수를 이동합니다.
+3. `Evaluate`로 Stockfish 평가를 돌립니다. 각 수의 점수가 수 오른쪽에 나옵니다.
+4. 평가가 끝나면 `Save`를 눌러 게임을 저장합니다.
 
 ### 실수 보기
 
-오른쪽 위 `See your mistakes`로 이동합니다.
+오른쪽 위 `See your mistakes`로 이동하여 저장한 게임들에서의 실수를 봅니다.
 
 ![실수 페이지](docs/mistakes.jpg)
 
-1. **Name**에 기보에 적힌 백 또는 흑 이름을 입력합니다.
+1. **Name**에 저장한 게임의 기보에 적힌 이름을 입력합니다.
 2. Inaccuracies, Mistakes, Blunders 중 하나를 고르고 `Show`를 누릅니다.
 3. 게임별로 둔 수(Move), 그 수 이후의 점수(Eval), 더 나은 수(Best Move)를 볼 수 있습니다.
 4. `Show board`는 그 수를 두기 전 장면입니다. 빨간 화살표는 둔 수, 초록 화살표는 더 나은 수입니다.
 
-나쁜 수는 승률이 얼마나 줄었는지로 정합니다. 승률이 조금 줄면 Inaccuracy, 더 줄면 Mistake, 크게 줄면 Blunder입니다.
+나쁜 수는 그 수로 인해 승률이 얼마나 줄었는지로 정합니다. 승률이 5%p 이상 10%p 미만 줄면 Inaccuracy, 10%p 이상 15%p 미만 줄면 Mistake, 15%p 이상 줄면 Blunder입니다. [승률 공식 정보](https://lichess.org/page/accuracy)
 
 ## 스택
 
