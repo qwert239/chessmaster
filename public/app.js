@@ -1,5 +1,5 @@
 import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm";
-import { Chessboard, FEN } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/+esm";
+import { Chessboard, COLOR, FEN } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/+esm";
 import { evaluateMoves } from "./stockfish.js";
 
 const ASSETS_URL = "https://cdn.jsdelivr.net/npm/cm-chessboard@8.7.11/assets/";
@@ -117,6 +117,15 @@ function showPly(next) {
   renderMoves();
 }
 
+// Put the other side at the bottom.
+function flipBoard() {
+  if (!board) {
+    return;
+  }
+  const next = board.getOrientation() === COLOR.white ? COLOR.black : COLOR.white;
+  board.setOrientation(next, true);
+}
+
 // Create the board the first time a game is loaded.
 function ensureBoard() {
   if (board) {
@@ -228,6 +237,8 @@ document.querySelector("#btn-save").addEventListener("click", async () => {
     setStatus(error.message || "Could not save the game.", true);
   }
 });
+
+document.querySelector("#btn-flip").addEventListener("click", flipBoard);
 
 // Step through the loaded game.
 document.querySelector("#btn-start").addEventListener("click", () => showPly(0));
