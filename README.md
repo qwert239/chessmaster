@@ -46,22 +46,4 @@ NestJS  ---- 로컬 ----> 로컬 Postgres
 
 `POST /games`는 기보와 평가를 저장합니다. `GET /mistakes?name=&verdict=`는 그 이름이 둔 나쁜 수만 게임별로 돌려줍니다. 데이터베이스에서 `games`는 기보 하나, `moves`는 그 안의 한 수입니다.
 
-로컬 실행:
-
-```bash
-npm install
-psql "postgresql://USER:PASSWORD@localhost:5432/chessmaster" -f db/schema.sql
-npm run start:dev
-```
-
-`.env`에는 `DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/chessmaster`를 넣습니다. 이 파일은 커밋하지 않습니다. 앱은 http://localhost:3000 입니다.
-
-배포는 `sam build` 다음 `sam deploy`입니다. 데이터베이스 비밀번호는 스택을 처음 만들 때 넘깁니다.
-
-```bash
-sam deploy --parameter-overrides "DbPassword=YOUR_PASSWORD"
-```
-
-이후 배포는 그 값을 유지하므로 `DbPassword` 없이 `sam deploy`만 하면 됩니다. 데이터베이스 수정은 RDS 포트 5432를 내 IP에만 여는 규칙을 추가한 뒤 PC에서 쿼리를 실행하고, 규칙을 지우면 됩니다.
-
 Stockfish 파일(`public/engine/`)은 [stockfish.js](https://github.com/nmrugg/stockfish.js) 19이며 GPLv3입니다.
